@@ -1,6 +1,5 @@
-**Final Project Report for CS 184A/284A, Fall 2024** 
 
-**Project Title:** Prediction of Human Gut Biotransformation Pathways **Project Number:** 17 
+# Prediction of Human Gut Biotransformation Pathways
 
 ## **Student Name(s)** 
 
@@ -26,7 +25,10 @@ https://www.kaggle.com/competitions/prediction-human-gut-biotransformation-pathw
 
 There are three files contained in our dataset, a training csv, a test csv, and sample submission csv. The training dataset contains 17301 gut biotransformation reactions. Each reaction is uniquely identified with an ID and the SMILES of reactants and products of each reaction. The test csv contains an ID of the pathway, the number of steps each pathway has (ie number of metabolites), and the first compound in the pathway. The csv file our model produced from running on the test dataset contains the ID of the pathway and then the first, second, third, fourth and fifth ranked predictions made by the model. The figures below depict the length and quantity of our SMILES, describing the general shape of our dataset: 
 
+<img width="627" height="220" alt="image" src="https://github.com/user-attachments/assets/f6b99b35-532d-4193-885f-0a67b61f691f" />
+
 The figures below show what our raw training data looks like (CSV file): 
+<img width="633" height="338" alt="image" src="https://github.com/user-attachments/assets/e1a03246-e2da-45e9-a3de-80c5b12da939" />
 
 ## **4. Technical Approach** 
 
@@ -43,6 +45,9 @@ We employed the RDKit library, a powerful toolkit for cheminformatics, to parse 
 To improve predictions and possibly rank outcomes, we used molecular fingerprints as features. Specifically, we used Morgan fingerprints (circular fingerprints), which were generated from the SMILES using RDKit. These fingerprints transform the molecular structure into a high-dimensional binary vector that represents chemical structures. We then combined reactant and product fingerprints to create training examples for supervised learning models. 
 
 We experimented with two machine learning algorithms, LightGBM and Random Forest. LightGBM is a machine learning model that improves its predictions by focusing on the most difficult examples during training, a process known as gradient boosting. In our project, it is used to predict and prioritize the most likely chemical reactions, especially when the data is uneven or imbalanced. Random Forest is a machine learning method that combines the results of many decision trees to make better predictions. For our project, it helps rank and classify the possible chemical transformations by analyzing patterns in the molecular features of reactants and products. We expanded on Random Forest by creating two models, one using 100 estimators and another using 200 estimators, in order to see the effects of increasing the amount of estimators on model performance. The figure below outlines our general system pipeline used in this project: 
+
+<img width="441" height="215" alt="image" src="https://github.com/user-attachments/assets/a83c1c64-56b8-4f98-bd4a-cd28fe39c73c" />
+
 
 ## **5. Software** 
 
@@ -63,10 +68,13 @@ The table below outlines all major pieces of software and code involved in the e
 ## **6. Experiments and Evaluation** 
 
 We chose to evaluate each of our models by using the Final Score (FS) metric as outlined by the Kaggle competition organizers for this specific project. The formula for the metric can be seen below: 
+<img width="166" height="44" alt="image" src="https://github.com/user-attachments/assets/c845332d-ed12-46fe-a6d8-287624fc8b1d" />
 
 This metric is an accuracy score that represents the average of the pathways’ similarity in the test dataset. The value of FS is between 0 and 1, with higher values indicating better performance. The PS in the formula represents pathway similarity, which compares how similar the pathways predicted by our model are with the true reaction pathway. PS is calculated using the following formula: 
+<img width="191" height="36" alt="image" src="https://github.com/user-attachments/assets/c8690339-0d6f-4627-93db-07f823644832" />
 
 The PMS in the formula represents the similarity between a predicted metabolite and the true metabolite in a reaction pathway. PMS is calculated using the following formula: 
+<img width="240" height="37" alt="image" src="https://github.com/user-attachments/assets/a3f8179b-b683-4ff2-9968-a8c9637786eb" />
 
 In this formula LD represents the Levenshtein Distance (LD), which is the difference between two string sequences, between the ground truth metabolite and the predicted metabolite. Essentially, the overall FS metric essentially compares our predicted pathways to the true pathways character-by-character using LD, allowing us to determine the overall effectiveness of our machine learning models. We used an 80/20 train/validation split of the training data, and evaluated our model’s performance using accuracy and F1 precision score (weighted). 
 
@@ -92,11 +100,16 @@ LightGBM Model:
 
 The figure below shows how Random Forest had a higher density of correct predictions (1.0) while LightGBM had a higher density of incorrect predictions (0.0), which is consistent with our results: 
 
+<img width="465" height="260" alt="image" src="https://github.com/user-attachments/assets/d07235e7-e675-4df7-abd2-7fc98cbe616f" />
+
+
 We can see that both Random Forest models significantly outperformed the LightGBM model in both accuracy and F1 score. This is likely due to the nature of our dataset, as Random Forest models tend to perform better than LightGBM models on complex datasets. As random forest models train each decision tree independently, as opposed to LGBM which uses gradient boosting, it produces more robust models that tend to fit complex data better. However, we found that increasing the amount of estimators from 100 to 200 did not seem to cause any significant improvement. This suggests that the model had already reached a point of diminishing returns in terms of additional estimators, with further increases providing minimal benefits. Overall, these results highlight the robustness of Random Forest for handling complex, high-dimensional datasets, making it a strong choice for our project. 
 
 Sensitivity to algorithmic choices played a critical role in shaping the performance of our models. We initially intended for our Random Forest models to use all 2048 features from the dataset. However, we found that the models simply would not run with all the features present, as they took far too much time to even produce results.Therefore, we found it necessary to use feature selection, and cut down the number of features to 500. This likely affected our model performance, as the remaining 1548 features may have contained crucial information that could have improved our models’ performance. Normalization and feature selection were critical for model stability. Techniques like SKLearn’s SelectKBest improved training, and we found that proper data cleaning significantly enhanced model performance. Our template selection strategy required careful calibration: more restrictive templates increased precision but limited pathway generation, while broader templates produced more diverse results at the cost of accuracy. Ultimately, finding the right balance between these approaches was key to optimizing our model's effectiveness. 
 
 The figure below depicts the trend seen in feature importance for our 500 features. The exponential curve shows that the most important features had by far the most significant impact on the models: 
+
+<img width="501" height="312" alt="image" src="https://github.com/user-attachments/assets/23e1dd05-77ea-4527-90f3-1d2d3f83fc4c" />
 
 More figures pertaining to our results can be found in the appendix section of this report. 
 
@@ -124,9 +137,17 @@ In conclusion, our exploration dove into the fascinating complexity of how chemi
 
 This figure shows the top 20 features integrated into our Random Forest models, giving us a closer look at feature importance: 
 
+<img width="538" height="315" alt="image" src="https://github.com/user-attachments/assets/8d125a5d-f639-4b77-8f07-8451a96130b9" />
+
 This figure is a confusion matrix showing the number of correct predictions for each of the first 10 classes in our LightGBM mode. You can see that the LGBM model does not predict accurately as there are not correct predictions for classes 0 through 7. This trend appeared for the rest of the classes: 
 
+<img width="412" height="437" alt="image" src="https://github.com/user-attachments/assets/e88da7f2-5110-42ea-a292-8cd95d5c8d4e" />
+
+
 This figure is a confusion matrix showing the number of correct predictions for each of the first 10 classes in our Random Forest (200 estimators) model. We can see that our Random Forest model either equalled or outperformed our LightGBM model in every class: 
+
+<img width="459" height="449" alt="image" src="https://github.com/user-attachments/assets/f0bf2b7d-c22d-493d-b1ba-8bc440a47006" />
+
 
 ## **Works Cited** 
 
